@@ -68,9 +68,9 @@ class MainApp(tk.Tk):
         self.acquisition_control_panel = tk.LabelFrame(self, text='Acquisition', padx=5, pady=5)
         self.acquisition_control_panel.grid(row=1, column=0, padx=5, pady=5)
 
-        self.calibrate_button = tk.Button(self.acquisition_control_panel, text='Calibrate (c)', width=10,
+        self.calibrate_button = tk.Button(self.acquisition_control_panel, text='Calibrate (F9)', width=10,
                                           command=self.handle_walabot_calibrate)
-        self.trigger_button = tk.Button(self.acquisition_control_panel, text='Trigger (t)', width=10,
+        self.trigger_button = tk.Button(self.acquisition_control_panel, text='Trigger (F1)', width=10,
                                         command=self.handle_walabot_trigger)
 
         self.calibrate_button.grid(row=0, column=0, padx=5, pady=5)
@@ -95,7 +95,7 @@ class MainApp(tk.Tk):
         self.save_file_prefix.set('capture')  # Default save file prefix
         self.save_file_prefix_entry = tk.Entry(self.save_control_panel, width=20, textvariable=self.save_file_prefix)
 
-        self.save_button = tk.Button(self.save_control_panel, text='Save acquisition (s)', width=20,
+        self.save_button = tk.Button(self.save_control_panel, text='Save acquisition (F2)', width=20,
                                      command=self.handle_save_capture)
 
         self.acquire_raw_signals_checkbutton.grid(row=0, column=0, padx=5, pady=5, sticky='W')
@@ -107,19 +107,24 @@ class MainApp(tk.Tk):
 
         # ----- Variable initialisation ----- #
         self.capture_saved = False  # Used for detecting duplicate saves.
+        self.counter = 0               # Number of captures saved with this file prefix
 
         # Default arena settings (profile dependent)
         self.param_1, self.param_2, self.param_3, self.threshold, self.filter_type = self.init_walabot_settings(self.selected_profile)
 
         # ----- Start ----- #
-        self.bind('<t>', self.handle_walabot_trigger)
-        self.bind('<c>', self.handle_walabot_calibrate)
-        self.bind('<s>', self.handle_save_capture)
+        self.bind('<F1>', self.handle_walabot_trigger)
+        self.bind('<F9>', self.handle_walabot_calibrate)
+        self.bind('<F2>', self.handle_save_capture)
         self.protocol('WM_DELETE_WINDOW', self.handle_app_exit) # Disconnect from Walabot if the application is closed
         self.mainloop()
 
     def is_walabot_connected(self):
-        '''True if Walabot is connected. False otherwise.'''
+        '''Determines if the Walabot is connected.
+
+        Output:
+            True if Walabot is connected. False otherwise.
+        '''
         return self.walabot.is_connected
 
     def init_walabot_settings(self, profile):
@@ -170,7 +175,6 @@ class MainApp(tk.Tk):
     def is_settings_window_open(self):
         '''
         Check to see if the Walabot settings window is already open. If it is, move it to the top.
-        Bit dodgy the way this is done so might change it later.
         '''
         children = list(self.children) # Child widgets of the root Tkinter window
         for child in children:
@@ -178,7 +182,7 @@ class MainApp(tk.Tk):
                 return True
         return False
 
-    def handle_profile_change(self):
+    def handle_profile_change(self, *args):
         '''
         If the scan profile is changed while the Walabot settings window is open,
         close it since it will probably require different options (e.g. spherical instead of cartesian).
@@ -196,7 +200,7 @@ class MainApp(tk.Tk):
             self.handle_walabot_settings_window()
 
         # If the Walabot is connected, it must be reconnected before setting the profile again.
-        if self.walabot.is_connected:
+        if self.is_walabot_connected():
             self.handle_walabot_disconnect()
             self.handle_walabot_connect_and_setup()
 
@@ -216,13 +220,15 @@ class MainApp(tk.Tk):
 
         connect_error = self.walabot.connect()
         if connect_error:
-            messagebox.showerror(title='Connect error', message=connect_error)
+            error_msg = 'Walabot API error: {}'.format(connect_error)
+            messagebox.showerror(title='Connect error', message=error_msg)
             return
 
         profile_error = self.walabot.set_profile(self.PROFILES[self.selected_profile])
         if profile_error:
             self.handle_walabot_disconnect()
-            messagebox.showerror(title='Error setting profile', message=profile_error)
+            error_msg = 'Walabot API error: {}'.format(profile_error)
+            messagebox.showerror(title='Error setting profile', message=error_msg)
             return
 
         if self.selected_profile == self.PROF_SHORT_RANGE_IMAGING:
@@ -233,7 +239,8 @@ class MainApp(tk.Tk):
                                                         self.threshold, self.filter_type)
         if arena_error:
             self.handle_walabot_disconnect()
-            messagebox.showerror(title='Error setting arena', message=arena_error)
+            error_msg = 'Walabot API error: {}'.format(arena_error)
+            messagebox.showerror(title='Error setting arena', message=error_msg)
             return
 
         # Toggle button function to disconnect
@@ -247,7 +254,8 @@ class MainApp(tk.Tk):
 
         disconnect_error = self.walabot.disconnect()
         if disconnect_error:
-            messagebox.showerror(title='Disconnect error', message=disconnect_error)
+            error_msg = 'Walabot API error {}'.format(disconnect_error)
+            messagebox.showerror(title='Disconnect error', message=error_msg)
             return
 
         # Toggle the connect/disconnect button
@@ -271,14 +279,22 @@ class MainApp(tk.Tk):
 
         self.walabot.trigger()
         self.capture_saved = False
+        print(" _______   _                               _ \n"
+              "|__   __| (_)                             | |\n"
+              "   | |_ __ _  __ _  __ _  ___ _ __ ___  __| |\n"
+              "   | | '__| |/ _` |/ _` |/ _ \ '__/ _ \/ _` |\n"
+              "   | | |  | | (_| | (_| |  __/ | |  __/ (_| |\n"
+              "   |_|_|  |_|\__, |\__, |\___|_|  \___|\__,_|\n"
+              "              __/ | __/ |                    \n"
+              "             |___/ |___/                     \n")
 
     def handle_app_exit(self):
         '''Disconnects from the Walabot if it is still connected and closes the program'''
 
-        if self.walabot.is_connected:
+        if self.is_walabot_connected():
             self.walabot.disconnect()
         self.destroy()
-        
+
 
     def generate_file_name(self, capture_type):
         '''
@@ -286,19 +302,18 @@ class MainApp(tk.Tk):
         The prefix is automatically fetched from the entry widget.
 
         Input:
-            capture_type: str, capture type for reference purposes (e.g. capture_0_signals.csv, capture_0_im.csv)
+            capture_type: str, capture type for reference purposes (e.g. capture_0_signals.csv, capture_0_im_2d.csv)
         '''
 
-        # TODO: Change counter to date and time
-        counter = 0
-        file_name = '{}_{}_{}.csv'.format(self.save_file_prefix.get(), str(counter), str(capture_type))
+        self.counter = 0
+        file_name = '{}_{}_{}.csv'.format(self.save_file_prefix.get(), str(self.counter), str(capture_type))
 
         # Looks in the current directory for csv files with the entered prefix and
         # increments the suffix counter. This way the user can terminate the
         # program and resume capturing/saving later on.
         while exists(file_name):
-            counter += 1
-            file_name = '{}_{}_{}.csv'.format(self.save_file_prefix.get(), str(counter), str(capture_type))
+            self.counter += 1
+            file_name = '{}_{}_{}.csv'.format(self.save_file_prefix.get(), str(self.counter), str(capture_type))
 
         return file_name
 
@@ -336,12 +351,20 @@ class MainApp(tk.Tk):
         if self.acquire_raw_image.get() == 1:
             self.save_raw_image()
 
+        print("   _____                     _ \n"
+              "  / ____|                   | |\n"
+              " | (___   __ ___   _____  __| |\n"
+              "  \___ \ / _` \ \ / / _ \/ _` |\n"
+              "  ____) | (_| |\ V /  __/ (_| |\n"
+              " |_____/ \__,_| \_/ \___|\__,_|\n")
+        print('Capture no.: {}'.format(self.counter))
+
     def save_capture(self, capture, capture_type):
         '''
         Saves the provided capture matrix to a .csv file using the entered prefix.
 
         Input:
-            capture: Pandas DataFrame containing the raw signals or image
+            capture: Pandas DataFrame or Numpy array containing the raw signals or image
             capture_type: signals, raw image slice, or raw image
         '''
 
@@ -358,15 +381,19 @@ class MainApp(tk.Tk):
         elif capture_type == self.IMAGE:
             # https://stackoverflow.com/questions/3685265/how-to-write-a-multidimensional-array-to-a-text-file
             with open(file_name, 'w') as outfile:
-                outfile.write('# Array shape: {}\n'.format(capture.shape))
+                outfile.write('# Array shape: {}x{}x{}\n'.format(capture.shape[0], capture.shape[1], capture.shape[2]))
                 for data_slice in capture:
                     np.savetxt(outfile, data_slice, fmt='%.f', comments='', delimiter=',')
                     outfile.write('# New slice\n')
 
         self.capture_saved = True
 
-    def save_axes(self):
-        '''Saves the axes for plotting to a separate CSV file'''
+    def save_axes(self, image_dim):
+        '''Saves the axes for plotting to a separate CSV file.
+
+        Input:
+            image_dim: Image dimensions - 2D or 3D for file name generation
+        '''
 
         # Min, max, and increment size for either X, Y, Z or
         # R, phi, theta depending on the profile
@@ -394,38 +421,44 @@ class MainApp(tk.Tk):
             axes_pd = pd.DataFrame(axes, index=['X', 'Y', 'Z'])
         else:
             axes_pd = pd.DataFrame(axes, index=['R', 'theta', 'phi'])
-        file_name = self.generate_file_name('axes')
+        file_name = self.generate_file_name(image_dim)
         axes_pd = axes_pd.transpose()
         axes_pd.to_csv(file_name, index=False)
 
     def save_raw_signals(self):
         '''Saves all of the Walabot's raw signals from the current trigger'''
 
-        # TODO: Investigate whether some settings like the MTI affects raw signals?
-
         # One capture (trigger) contains a time column plus all of the raw signals from the antenna pairs.
         # E.g. All 40 pairs using the Sensor profile would result in an array of size 8192 by 41.
 
         signals_capture, error = self.walabot.get_raw_signals()
         if error:
-            error_msg = 'Save error: {}'.format(error)
-            messagebox.showerror(title='Walabot API error', message=error_msg)
+            error_msg = 'Walabot API error: {}'.format(error)
+            messagebox.showerror(title='Error saving raw signals', message=error_msg)
         else:
             self.save_capture(signals_capture, self.SIGNALS)
 
     def save_raw_image_slice(self):
         '''Saves a 2D image slice from the current trigger'''
 
-        # TODO: Investigate whether MTI affects the Imaging profile
-        image_slice_capture = self.walabot.get_raw_image_slice()
-        self.save_capture(image_slice_capture, self.IMAGE_SLICE)
-        self.save_axes()
+        image_slice_capture, error = self.walabot.get_raw_image_slice()
+        if error:
+            error_msg = 'Walabot API error: {}'.format(error)
+            messagebox.showerror(title='Error saving image slice', message=error_msg)
+        else:
+            self.save_capture(image_slice_capture, self.IMAGE_SLICE)
+            self.save_axes('im_2d_axes')
 
     def save_raw_image(self):
         '''Saves a 3D image from the current trigger'''
 
-        image_capture = self.walabot.get_raw_image()
-        self.save_capture(image_capture, self.IMAGE)
+        image_capture, error = self.walabot.get_raw_image()
+        if error:
+            error_msg = 'Walabot API error: {}'.format(error)
+            messagebox.showerror(title='Error saving image', message=error_msg)
+        else:
+            self.save_capture(image_capture, self.IMAGE)
+            self.save_axes('im_3d_axes')
 
 
 class WalabotSettingsWindow(tk.Toplevel):

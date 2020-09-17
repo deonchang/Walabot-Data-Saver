@@ -103,7 +103,7 @@ class Walabot():
 
         Output:
             signals_pd: raw signals as an NxM Pandas DataFrame where N is the number of samples and M is the time vector + number of antenna pairs.
-            walabot_error: None if no error occured. Otherwise returns the API error.
+            walabot_error: None if no error occurred. Otherwise returns the API error.
         '''
         signals_pd = pd.DataFrame()
         walabot_error = None
@@ -194,19 +194,20 @@ class Walabot():
         MTI/derivative filter, and threshold settings.
         For more information, refer to the Walabot API function GetRawImageSlice().
 
-        Output:
-            2D image as a 2D Pandas DataFrame
+        Outputs:
+            2D image as a Numpy array if no error occurred.
+            walabot_error: None if no error occurred. Otherwise returns the API error.
         '''
 
-        image, _, _, _, _ = self.walabot.GetRawImageSlice()
-        print(image)
-        print('***************************')
-        image_np = np.transpose(np.array(image))
-        print(image_np)
-        # image_pd = pd.DataFrame(image)
-        # image_pd = image_pd.transpose()
+        walabot_error = None
+        image_slice_np = np.array([])
+        try:
+            image_slice, _, _, _, _ = self.walabot.GetRawImageSlice()
+            image_slice_np = np.transpose(np.array(image_slice))
+        except self.walabot.WalabotError:
+            walabot_error = self.walabot.GetErrorString()
 
-        return image_np
+        return image_slice_np, walabot_error
 
     def get_raw_image(self):
         '''
@@ -214,11 +215,17 @@ class Walabot():
         MTI/derivative filter, and threshold settings.
         For more information, refer to the Walabot API function GetRawImage().
 
-        Output:
-            3D image as a 3D Pandas DataFrame
+        Outputs:
+            3D image as a Numpy array if no error occurred.
+            walabot_error: None if no error occurred. Otherwise returns the API error.
         '''
 
-        image, _, _, _, _ = self.walabot.GetRawImage()
-        image_np = np.array(image)
+        walabot_error = None
+        image_np = np.array([])
+        try:
+            image, _, _, _, _ = self.walabot.GetRawImage()
+            image_np = np.array(image)
+        except self.walabot.WalabotError:
+            walabot_error = self.walabot.GetErrorString()
 
-        return image_np
+        return image_np, walabot_error
