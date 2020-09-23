@@ -186,6 +186,9 @@ class MainApp(tk.Tk):
         '''
         If the scan profile is changed while the Walabot settings window is open,
         close it since it will probably require different options (e.g. spherical instead of cartesian).
+
+        Note that this function ignores input arguments - *args exists as a placeholder for when
+        this function is called by a callback function which passes in an event.
         '''
 
         # Reinitialise the Walabot settings upon changing profile as the new profile might
@@ -271,7 +274,12 @@ class MainApp(tk.Tk):
         self.walabot.calibrate()
 
     def handle_walabot_trigger(self, *args):
-        '''Runs a Trigger() command on the Walabot'''
+        '''
+        Runs a Trigger() command on the Walabot
+        
+        Note that this function ignores input arguments - *args exists as a placeholder for when
+        this function is called by a callback function which passes in an event.
+        '''
 
         if not self.walabot.is_connected:
             messagebox.showerror('Trigger error', 'The Walabot is not connected!')
@@ -321,6 +329,9 @@ class MainApp(tk.Tk):
         '''
         Checks whether or not the user has already capture_saved the current trigger
         and also if they have one of the save checkboxes ticked.
+
+        Note that this function ignores input arguments - *args exists as a placeholder for when
+        this function is called by a callback function which passes in an event.
         '''
 
         if self.acquire_raw_signals.get() + \
@@ -381,7 +392,7 @@ class MainApp(tk.Tk):
         elif capture_type == self.IMAGE:
             # https://stackoverflow.com/questions/3685265/how-to-write-a-multidimensional-array-to-a-text-file
             with open(file_name, 'w') as outfile:
-                outfile.write('# Array shape: {}x{}x{}\n'.format(capture.shape[0], capture.shape[1], capture.shape[2]))
+                outfile.write('# Array shape (rows x columns x depth): {}x{}x{}\n'.format(capture.shape[1], capture.shape[2], capture.shape[0]))
                 for data_slice in capture:
                     np.savetxt(outfile, data_slice, fmt='%.f', comments='', delimiter=',')
                     outfile.write('# New slice\n')
@@ -389,10 +400,13 @@ class MainApp(tk.Tk):
         self.capture_saved = True
 
     def save_axes(self, image_dim):
-        '''Saves the axes for plotting to a separate CSV file.
+        '''
+        Saves the axes for plotting to a separate CSV file.
+        Note that although the 2D images only have two axes (X, Y) or (Phi, R),
+        all three axes are saved for reference purposes.
 
         Input:
-            image_dim: Image dimensions - 2D or 3D for file name generation
+            image_dim: str, 2D or 3D for file name generation
         '''
 
         # Min, max, and increment size for either X, Y, Z or

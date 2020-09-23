@@ -19,43 +19,41 @@ class Walabot():
         Establishes a connection with the Walabot.
 
         Output:
-            None if a successful connection was made. Otherwise, the API error is returned.
+            walabot_error: None if a successful connection was made. Otherwise, the API error is returned.
         '''
 
+        walabot_error = None
         try:
             print('Connecting to the Walabot...')
             self.walabot.ConnectAny()
+            print('Connected to the Walabot!')
+            self.is_connected = True
         except self.walabot.WalabotError:
             print('Failed to connect to the Walabot!')
             walabot_error = self.walabot.GetErrorString()
-            # print('Walabot API error: {}'.format(walabot_error))
-            return walabot_error
-
-        print('Connected to the Walabot!')
-        self.is_connected = True
-        return None
+        
+        return walabot_error
 
     def disconnect(self):
         '''
         Stop and close connection with the Walabot.
 
         Output:
-            None if the Walabot was successfully disconnected. Otherwise, the API error is returned.
+            walabot_error: None if the Walabot was successfully disconnected. Otherwise, the API error is returned.
         '''
 
+        walabot_error = None
         try:
             print('Disconnecting from the Walabot...')
             walabot.Stop()
             walabot.Disconnect()
+            print('Disconnected from the Walabot!')
+            self.is_connected = False
         except self.walabot.WalabotError:
             print('Failed to disconnect from the Walabot!')
             walabot_error = self.walabot.GetErrorString()
-            # print('Walabot API error: {}'.format(walabot_error))
-            return walabot_error
 
-        print('Disconnected from the Walabot!')
-        self.is_connected = False
-        return None
+        return walabot_error
 
     def start(self):
         '''Starts the Walabot'''
@@ -69,15 +67,17 @@ class Walabot():
         Inputs:
             profile: refer to WalabotAPI.py profile constants.
 
-        Output: None if profile was set successfully. Otherwise, the API error is returned.
+        Output:
+            walabot_error: None if profile was set successfully. Otherwise, the API error is returned.
         '''
+
+        walabot_error = None
         try:
             self.walabot.SetProfile(profile)
         except self.walabot.WalabotError:
             walabot_error = self.walabot.GetErrorString()
-            return walabot_error
 
-        return None
+        return walabot_error
 
     def trigger(self):
         '''Triggers the Walabot and saves data.'''
@@ -195,7 +195,7 @@ class Walabot():
         For more information, refer to the Walabot API function GetRawImageSlice().
 
         Outputs:
-            2D image as a Numpy array if no error occurred.
+            image_np: 2D image as a Numpy array if no error occurred.
             walabot_error: None if no error occurred. Otherwise returns the API error.
         '''
 
@@ -203,7 +203,7 @@ class Walabot():
         image_slice_np = np.array([])
         try:
             image_slice, _, _, _, _ = self.walabot.GetRawImageSlice()
-            image_slice_np = np.transpose(np.array(image_slice))
+            image_slice_np = np.transpose(np.array(image_slice)) # Row, column
         except self.walabot.WalabotError:
             walabot_error = self.walabot.GetErrorString()
 
@@ -216,7 +216,7 @@ class Walabot():
         For more information, refer to the Walabot API function GetRawImage().
 
         Outputs:
-            3D image as a Numpy array if no error occurred.
+            image_np: 3D image as a Numpy array if no error occurred.
             walabot_error: None if no error occurred. Otherwise returns the API error.
         '''
 
@@ -225,6 +225,7 @@ class Walabot():
         try:
             image, _, _, _, _ = self.walabot.GetRawImage()
             image_np = np.array(image)
+            image_np = np.fliplr(np.transpose(image_np, (2, 0, 1))) # Transpose (row, column, depth) and flip
         except self.walabot.WalabotError:
             walabot_error = self.walabot.GetErrorString()
 
