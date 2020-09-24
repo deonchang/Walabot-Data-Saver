@@ -352,6 +352,15 @@ class MainApp(tk.Tk):
             if not continue_saving:
                 return
 
+        print("   _____             _                   \n"
+              "  / ____|           (_)                  \n"
+              " | (___   __ ___   ___ _ __   __ _       \n"
+              "  \___ \ / _` \ \ / / | '_ \ / _` |      \n"
+              "  ____) | (_| |\ V /| | | | | (_| |_ _ _ \n"
+              " |_____/ \__,_| \_/ |_|_| |_|\__, (_|_|_)\n"
+              "                              __/ |      \n"
+              "                             |___/       \n")
+
         # Save the requested data
         if self.acquire_raw_signals.get() == 1:
             self.save_raw_signals()

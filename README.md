@@ -26,7 +26,11 @@ Before capturing data, the Walabot should be calibrated to zero out the images. 
 
 
 ### Saving
-The captures can then be saved by checking the data types you wish to save. The output CSV files are saved in the same directory.
+The captures can then be saved by checking the data types you wish to save. A custom prefix can be entered for easy identification. The output CSV files are saved in the same directory. The files are saved with the following naming convention:
+```
+[prefix]_[capture_number]_[capture_type].csv
+```
+The capture number is automatically incremented based on the number of files with the same prefixes in the current directory.
 
 ## License
 This project is licensed under the [GNU GPLv3](https://www.gnu.org/licenses/gpl-3.0.en.html) licence.
