@@ -209,6 +209,24 @@ class Walabot():
 
         return image_slice_np, walabot_error
 
+    def get_image_dimensions(self):
+        '''
+        Returns the dimensions of a 2D image slice given the current arena configuration.
+
+        Output:
+            walabot_error: None if no error occurred. Otherwise returns the API error.
+        '''
+
+        width = 0
+        height = 0
+        walabot_error = None
+        try:
+            _, width, height, _, _ = self.walabot.GetRawImageSlice()
+        except self.walabot.WalabotError:
+            walabot_error = self.walabot.GetErrorString()
+
+        return width, height, walabot_error
+
     def get_raw_image(self):
         '''
         Returns a 3D image as defined by the arena parameters,
