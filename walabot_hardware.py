@@ -92,13 +92,13 @@ class Walabot():
             self.walabot.Trigger()
         except self.walabot.WalabotError:
             walabot_error = self.walabot.GetErrorString()
-        
+
         return walabot_error
 
     def calibrate(self):
         '''
         Runs the built-in calibration function.
-        
+
         Output:
             walabot_error: None if calibration started successfully. Otherwise the API error is returned.
         '''

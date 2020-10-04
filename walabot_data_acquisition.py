@@ -185,7 +185,7 @@ class MainApp(tk.Tk):
         self.bind('<F9>', self.handle_walabot_calibrate)
         self.bind('<F2>', self.handle_save_capture)
         self.protocol('WM_DELETE_WINDOW', self.handle_app_exit) # Disconnect from Walabot if the application is closed
-        self.minsize(592, 488)
+        self.minsize(645, 553)
         self.mainloop()
 
     def is_walabot_connected(self):
@@ -217,7 +217,7 @@ class MainApp(tk.Tk):
             filter_type = self.FILTER_TYPES['None']
 
         return param_1, param_2, param_3, threshold, filter_type
-    
+
     def get_image_dimensions(self):
         '''
         Returns the dimensions of a 2D image slice given the current arena configuration.
@@ -373,10 +373,10 @@ class MainApp(tk.Tk):
                                                  command=self.handle_walabot_disconnect)
 
         self.walabot.start()
-        
+
         # Clear the previw image
         self.delete_preview_pixels()
-        self.create_preview_pixels()        
+        self.create_preview_pixels()
 
     def handle_walabot_disconnect(self):
         '''Disconnect from the Walabot and reconfigure GUI buttons'''
@@ -397,7 +397,7 @@ class MainApp(tk.Tk):
         if not self.walabot.is_connected:
             messagebox.showerror('Calibrate error', 'The Walabot is not connected!')
             return
-        
+
         calibrate_error = self.walabot.calibrate()
         if calibrate_error:
             error_msg = 'Walabot API error: {}'.format(calibrate_error)
@@ -406,7 +406,7 @@ class MainApp(tk.Tk):
     def handle_walabot_trigger(self, *args):
         '''
         Runs a Trigger() command on the Walabot
-        
+
         Note that this function ignores input arguments - *args exists as a placeholder for when
         this function is called by a callback function which passes in an event.
         '''
@@ -423,14 +423,13 @@ class MainApp(tk.Tk):
             self.preview_image()
             self.capture_saved = False
             print(" _______   _                               _ \n"
-                "|__   __| (_)                             | |\n"
-                "   | |_ __ _  __ _  __ _  ___ _ __ ___  __| |\n"
-                "   | | '__| |/ _` |/ _` |/ _ \ '__/ _ \/ _` |\n"
-                "   | | |  | | (_| | (_| |  __/ | |  __/ (_| |\n"
-                "   |_|_|  |_|\__, |\__, |\___|_|  \___|\__,_|\n"
-                "              __/ | __/ |                    \n"
-                "             |___/ |___/                     \n")
-            x, y = self.get_image_dimensions()
+                  "|__   __| (_)                             | |\n"
+                  "   | |_ __ _  __ _  __ _  ___ _ __ ___  __| |\n"
+                  "   | | '__| |/ _` |/ _` |/ _ \ '__/ _ \/ _` |\n"
+                  "   | | |  | | (_| | (_| |  __/ | |  __/ (_| |\n"
+                  "   |_|_|  |_|\__, |\__, |\___|_|  \___|\__,_|\n"
+                  "              __/ | __/ |                    \n"
+                  "             |___/ |___/                     \n")
 
     def handle_app_exit(self):
         '''Disconnects from the Walabot if it is still connected and closes the program'''
@@ -479,17 +478,17 @@ class MainApp(tk.Tk):
         Note that this function ignores input arguments - *args exists as a placeholder for when
         this function is called by a callback function which passes in an event.
         '''
+        
+        if not self.walabot.is_connected:
+            messagebox.showerror('Connect error', 'The Walabot is not connected!')
+            return
 
         if self.acquire_raw_signals.get() + \
            self.acquire_raw_image_slice.get() + \
            self.acquire_raw_image.get() == 0:
             # Check whether at least one acquisition type (signals, 2D image, or 3D image) is selected
             messagebox.showerror('Save error', 'No acquisition type selected!')
-            return
-
-        if not self.walabot.is_connected:
-            messagebox.showerror('Connect error', 'The Walabot is not connected!')
-            return
+            return      
 
         if self.capture_saved:
             continue_saving = messagebox.askyesno('Confirm save',
@@ -629,7 +628,7 @@ class MainApp(tk.Tk):
         image_slice_capture, error = self.walabot.get_raw_image_slice()
         if error:
             error_msg = 'Walabot API error: {}'.format(error)
-            messagebox.showerror(title='Error saving image slice', message=error_msg)
+            messagebox.showerror(title='Error saving 2D image', message=error_msg)
         else:
             self.save_capture(image_slice_capture, self.IMAGE_SLICE)
             self.save_axes('im_2d_axes')
@@ -640,7 +639,7 @@ class MainApp(tk.Tk):
         image_capture, error = self.walabot.get_raw_image()
         if error:
             error_msg = 'Walabot API error: {}'.format(error)
-            messagebox.showerror(title='Error saving image', message=error_msg)
+            messagebox.showerror(title='Error saving 3D image', message=error_msg)
         else:
             self.save_capture(image_capture, self.IMAGE)
             self.save_axes('im_3d_axes')
