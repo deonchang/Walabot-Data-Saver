@@ -57,9 +57,9 @@ class MainApp(tk.Tk):
         # Integer values of the profiles taken from WalabotAPI.py
         # There is PROF_WIDE, but it is not supported for the Developer edition.
         # Likewise PROF_TRACKER does not support raw signals.
-        self.PROF_SHORT_RANGE_IMAGING = 'PROF_SHORT_RANGE_IMAGING'
-        self.PROF_SENSOR_NARROW = 'PROF_SENSOR_NARROW'
-        self.PROF_TRACKER = 'PROF_TRACKER'
+        self.PROF_SHORT_RANGE_IMAGING = 'SHORT_RANGE_IMAGING'
+        self.PROF_SENSOR_NARROW = 'SENSOR_NARROW'
+        self.PROF_TRACKER = 'TRACKER'
         self.PROFILES = {
             self.PROF_SHORT_RANGE_IMAGING: 0x00010000,
             self.PROF_SENSOR_NARROW: 0x00020000 + 1,
@@ -94,9 +94,11 @@ class MainApp(tk.Tk):
         self.profile_list.current(0)  # Default to imaging profile
         self.selected_profile = self.profile_list.get()
 
-        self.walabot_settings_button = tk.Button(self.walabot_control_panel, text='Walabot settings', width=20,
+        self.walabot_settings_button = tk.Button(self.walabot_control_panel,
+                                                 text='Walabot settings', width=20,
                                                  command=self.handle_walabot_settings_window)
-        self.connect_disconnect_button = tk.Button(self.walabot_control_panel, text='Connect to Walabot', width=20,
+        self.connect_disconnect_button = tk.Button(self.walabot_control_panel,
+                                                   text='Connect to Walabot', width=20,
                                                    command=self.handle_walabot_connect_and_setup)
 
         self.profile_list_label.grid(row=0, column=0, padx=5, pady=5, sticky='W')
@@ -108,10 +110,10 @@ class MainApp(tk.Tk):
         self.acquisition_control_panel = tk.LabelFrame(self, text='Acquisition', padx=5, pady=5)
         self.acquisition_control_panel.grid(row=1, column=0, padx=5, pady=5)
 
-        self.calibrate_button = tk.Button(self.acquisition_control_panel, text='Calibrate (F9)', width=10,
-                                          command=self.handle_walabot_calibrate)
-        self.trigger_button = tk.Button(self.acquisition_control_panel, text='Trigger (F1)', width=10,
-                                        command=self.handle_walabot_trigger)
+        self.calibrate_button = tk.Button(self.acquisition_control_panel, text='Calibrate (F9)',
+                                          width=10, command=self.handle_walabot_calibrate)
+        self.trigger_button = tk.Button(self.acquisition_control_panel, text='Trigger (F1)',
+                                        width=10, command=self.handle_walabot_trigger)
 
         self.calibrate_button.grid(row=0, column=0, padx=5, pady=5)
         self.trigger_button.grid(row=0, column=1, padx=5, pady=5)
@@ -121,35 +123,51 @@ class MainApp(tk.Tk):
         self.save_control_panel.grid(row=2, column=0, padx=5, pady=5)
 
         self.acquire_raw_signals = tk.IntVar()
-        self.acquire_raw_signals_checkbutton = tk.Checkbutton(self.save_control_panel, text='Raw Signals',
+        self.acquire_raw_signals_checkbutton = tk.Checkbutton(self.save_control_panel,
+                                                              text='Raw Signals',
                                                               variable=self.acquire_raw_signals)
         self.acquire_raw_image_slice = tk.IntVar()
-        self.acquire_raw_image_slice_checkbutton = tk.Checkbutton(self.save_control_panel, text='Raw Image Slice',
+        self.acquire_raw_image_slice_checkbutton = tk.Checkbutton(self.save_control_panel,
+                                                                  text='Raw Image Slice (2D)',
                                                                   variable=self.acquire_raw_image_slice)
         self.acquire_raw_image = tk.IntVar()
-        self.acquire_raw_image_checkbutton = tk.Checkbutton(self.save_control_panel, text='Raw Image',
+        self.acquire_raw_image_checkbutton = tk.Checkbutton(self.save_control_panel,
+                                                            text='Raw Image (3D)',
                                                             variable=self.acquire_raw_image)
 
-        self.save_file_prefix_entry_label = tk.Label(self.save_control_panel, anchor='w', text='Save file prefix:')
+        self.save_file_prefix_entry_label = tk.Label(self.save_control_panel,
+                                                     anchor='w', text='Save file prefix:')
         self.save_file_prefix = tk.StringVar()
         self.save_file_prefix.set('capture')  # Default save file prefix
-        self.save_file_prefix_entry = tk.Entry(self.save_control_panel, width=20, textvariable=self.save_file_prefix)
+        self.save_file_prefix_entry = tk.Entry(self.save_control_panel,
+                                               width=20, textvariable=self.save_file_prefix)
 
-        self.save_button = tk.Button(self.save_control_panel, text='Save acquisition (F2)', width=20,
-                                     command=self.handle_save_capture)
+        self.capture_no_entry_label = tk.Label(self.save_control_panel,
+                                               anchor='w', text='Capture no.:')
+        self.capture_no = tk.IntVar()
+        self.capture_no.set(0)  # Default capture number
+        self.capture_no_entry = tk.Entry(self.save_control_panel, width=20,
+                                         textvariable=self.capture_no)
+
+        self.save_button = tk.Button(self.save_control_panel, text='Save acquisition (F2)',
+                                     width=20, command=self.handle_save_capture)
 
         self.acquire_raw_signals_checkbutton.grid(row=0, column=0, padx=5, pady=5, sticky='W')
         self.acquire_raw_image_slice_checkbutton.grid(row=1, column=0, padx=5, pady=5, sticky='W')
         self.acquire_raw_image_checkbutton.grid(row=2, column=0, padx=5, pady=5, sticky='W')
         self.save_file_prefix_entry_label.grid(row=3, column=0, padx=5, pady=5, sticky='W')
         self.save_file_prefix_entry.grid(row=4, column=0, padx=5, pady=5)
-        self.save_button.grid(row=5, column=0, padx=5, pady=5)
+        self.capture_no_entry_label.grid(row=5, column=0, padx=5, pady=5, sticky='W')
+        self.capture_no_entry.grid(row=6, column=0, padx=5, pady=5)
+        self.save_button.grid(row=7, column=0, padx=5, pady=5)
 
         # ----- Image preview panel ------ #
-        self.canvas_width = 360
-        self.canvas_height = 445
+        # Aspect ratio of 2D image using short range imaging and standard settings is 17x21 (w*h)
+        self.canvas_width = 413
+        self.canvas_height = 510
         self.image_preview_panel = tk.LabelFrame(self, text='Image slice preview', padx=5, pady=5)
-        self.image_preview_canvas = tk.Canvas(self.image_preview_panel, width=self.canvas_width, height=self.canvas_height)
+        self.image_preview_canvas = tk.Canvas(self.image_preview_panel,
+                                              width=self.canvas_width, height=self.canvas_height)
         self.image_preview_canvas.configure(background='#' + self.COLOURS[0]) # Default background colour (purple)
 
         self.image_preview_panel.grid(row=0, column=1, rowspan=3, padx=5, pady=5)
@@ -355,7 +373,8 @@ class MainApp(tk.Tk):
                                                  command=self.handle_walabot_disconnect)
 
         self.walabot.start()
-
+        
+        # Clear the previw image
         self.delete_preview_pixels()
         self.create_preview_pixels()        
 
@@ -369,7 +388,8 @@ class MainApp(tk.Tk):
             return
 
         # Toggle the connect/disconnect button
-        self.connect_disconnect_button.configure(text='Connect to Walabot', command=self.handle_walabot_connect_and_setup)
+        self.connect_disconnect_button.configure(text='Connect to Walabot',
+                                                 command=self.handle_walabot_connect_and_setup)
 
     def handle_walabot_calibrate(self, *args):
         '''Calibrates the Walabot using the Calibrate() function'''
@@ -377,8 +397,11 @@ class MainApp(tk.Tk):
         if not self.walabot.is_connected:
             messagebox.showerror('Calibrate error', 'The Walabot is not connected!')
             return
-
-        self.walabot.calibrate()
+        
+        calibrate_error = self.walabot.calibrate()
+        if calibrate_error:
+            error_msg = 'Walabot API error: {}'.format(calibrate_error)
+            messagebox.showerror('Calibrate error', error_msg)
 
     def handle_walabot_trigger(self, *args):
         '''
@@ -392,18 +415,22 @@ class MainApp(tk.Tk):
             messagebox.showerror('Trigger error', 'The Walabot is not connected!')
             return
 
-        self.walabot.trigger()
-        self.preview_image()
-        self.capture_saved = False
-        print(" _______   _                               _ \n"
-              "|__   __| (_)                             | |\n"
-              "   | |_ __ _  __ _  __ _  ___ _ __ ___  __| |\n"
-              "   | | '__| |/ _` |/ _` |/ _ \ '__/ _ \/ _` |\n"
-              "   | | |  | | (_| | (_| |  __/ | |  __/ (_| |\n"
-              "   |_|_|  |_|\__, |\__, |\___|_|  \___|\__,_|\n"
-              "              __/ | __/ |                    \n"
-              "             |___/ |___/                     \n")
-        x, y = self.get_image_dimensions()
+        trigger_error = self.walabot.trigger()
+        if trigger_error:
+            error_msg = 'Walabot API error: {}'.format(trigger_error)
+            messagebox.showerror('Trigger error', error_msg)
+        else:
+            self.preview_image()
+            self.capture_saved = False
+            print(" _______   _                               _ \n"
+                "|__   __| (_)                             | |\n"
+                "   | |_ __ _  __ _  __ _  ___ _ __ ___  __| |\n"
+                "   | | '__| |/ _` |/ _` |/ _ \ '__/ _ \/ _` |\n"
+                "   | | |  | | (_| | (_| |  __/ | |  __/ (_| |\n"
+                "   |_|_|  |_|\__, |\__, |\___|_|  \___|\__,_|\n"
+                "              __/ | __/ |                    \n"
+                "             |___/ |___/                     \n")
+            x, y = self.get_image_dimensions()
 
     def handle_app_exit(self):
         '''Disconnects from the Walabot if it is still connected and closes the program'''
@@ -412,7 +439,6 @@ class MainApp(tk.Tk):
             self.walabot.disconnect()
         self.destroy()
 
-
     def generate_file_name(self, capture_type):
         '''
         Generates the file name for the capture and appends a counter and file type in the filename.
@@ -420,19 +446,30 @@ class MainApp(tk.Tk):
 
         Input:
             capture_type: str, capture type for reference purposes (e.g. capture_0_signals.csv, capture_0_im_2d.csv)
+
+        Outputs:
+            file_name: string, generated file name.
         '''
 
-        self.counter = 0
-        file_name = '{}_{}_{}.csv'.format(self.save_file_prefix.get(), str(self.counter), str(capture_type))
-
-        # Looks in the current directory for csv files with the entered prefix and
-        # increments the suffix counter. This way the user can terminate the
-        # program and resume capturing/saving later on.
-        while exists(file_name):
-            self.counter += 1
-            file_name = '{}_{}_{}.csv'.format(self.save_file_prefix.get(), str(self.counter), str(capture_type))
+        file_name = '{}_{}_{}.csv'.format(self.save_file_prefix.get(),
+                                          str(self.capture_no.get()),
+                                          str(capture_type))
 
         return file_name
+
+    def check_file_exists(self, capture_type):
+        '''Checks if a file with the current file prefix, capture no., and capture type exists.
+
+        Output:
+            file_exists: bool, True if file exists, False otherwise.
+        '''
+
+        file_exists = False
+        file_name = self.generate_file_name(capture_type)
+        if exists(file_name):
+            file_exists = True
+
+        return file_exists
 
     def handle_save_capture(self, *args):
         '''
@@ -461,6 +498,18 @@ class MainApp(tk.Tk):
             if not continue_saving:
                 return
 
+        signals_file_exists = self.check_file_exists(self.SIGNALS)
+        image_slice_file_exists = self.check_file_exists(self.IMAGE_SLICE)
+        image_file_exists = self.check_file_exists(self.IMAGE)
+        if signals_file_exists or image_slice_file_exists or image_file_exists:
+            continue_saving = messagebox.askyesno('File already exists',
+                                                  'A file with the current prefix, capture no., and capture type already exists. Would you like to overwrite it?',
+                                                  icon=messagebox.WARNING)
+            print(continue_saving)
+            if not continue_saving:
+                messagebox.showwarning('Save cancelled', 'No acquisition(s) were saved.')
+                return
+
         print("   _____             _                   \n"
               "  / ____|           (_)                  \n"
               " | (___   __ ___   ___ _ __   __ _       \n"
@@ -480,13 +529,15 @@ class MainApp(tk.Tk):
         if self.acquire_raw_image.get() == 1:
             self.save_raw_image()
 
+        # Increment the capture number
+        self.capture_no.set(self.capture_no.get() + 1)
+
         print("   _____                     _ \n"
               "  / ____|                   | |\n"
               " | (___   __ ___   _____  __| |\n"
               "  \___ \ / _` \ \ / / _ \/ _` |\n"
               "  ____) | (_| |\ V /  __/ (_| |\n"
               " |_____/ \__,_| \_/ \___|\__,_|\n")
-        print('Capture no.: {}'.format(self.counter))
 
     def save_capture(self, capture, capture_type):
         '''
@@ -510,7 +561,9 @@ class MainApp(tk.Tk):
         elif capture_type == self.IMAGE:
             # https://stackoverflow.com/questions/3685265/how-to-write-a-multidimensional-array-to-a-text-file
             with open(file_name, 'w') as outfile:
-                outfile.write('# Array shape (rows x columns x depth): {}x{}x{}\n'.format(capture.shape[1], capture.shape[2], capture.shape[0]))
+                outfile.write('# Array shape (rows x columns x depth): {}x{}x{}\n'.format(capture.shape[1],
+                                                                                          capture.shape[2],
+                                                                                          capture.shape[0]))
                 for data_slice in capture:
                     np.savetxt(outfile, data_slice, fmt='%.f', comments='', delimiter=',')
                     outfile.write('# New slice\n')
@@ -615,8 +668,10 @@ class WalabotSettingsWindow(tk.Toplevel):
         tk.Toplevel.__init__(self)
         self.master = master
         self.title('Walabot settings')
-        self.apply_button = tk.Button(self, text='Apply', width=10, command=self.handle_apply_button)
-        self.cancel_button = tk.Button(self, text='Cancel', width=10, command=self.handle_cancel_button)
+        self.apply_button = tk.Button(self, text='Apply', width=10,
+                                      command=self.handle_apply_button)
+        self.cancel_button = tk.Button(self, text='Cancel', width=10,
+                                       command=self.handle_cancel_button)
         self.apply_button.grid(row=1, column=1, padx=5, pady=5)
         self.cancel_button.grid(row=0, column=1, padx=5, pady=5)
 
@@ -666,14 +721,16 @@ class WalabotSettingsWindow(tk.Toplevel):
 
         # ----- Additional settings control panel ----- #
         # These widgets are common amongst the profiles.
-        self.additional_control_panel = tk.LabelFrame(self, text='Additional settings', padx=86, pady=5)
+        self.additional_control_panel = tk.LabelFrame(self, text='Additional settings',
+                                                      padx=86, pady=5)
         self.additional_control_panel.grid(row=1, column=0, padx=5, pady=5)
         self.threshold_label = tk.Label(self.additional_control_panel, text='Threshold: ')
         self.threshold_entry = tk.Entry(self.additional_control_panel, width=8)
         self.threshold_entry.insert(0, threshold)
 
         self.filter_label = tk.Label(self.additional_control_panel, text='Filter type:')
-        self.filter_list = Combobox(self.additional_control_panel, values=self.master.FILTER_NAMES, state='readonly', width=8)
+        self.filter_list = Combobox(self.additional_control_panel,
+                                    values=self.master.FILTER_NAMES, state='readonly', width=8)
         self.filter_list.current(filter_type)
 
         self.threshold_label.grid(row=0, column=0, padx=5, pady=5, sticky='W')
@@ -720,27 +777,35 @@ class WalabotSettingsWindow(tk.Toplevel):
     def handle_apply_button(self):
         '''Passes the entered parameters back into the main window'''
 
-        if self.master.is_walabot_connected():
-            messagebox.showerror('Error setting arena', 'These settings cannot be changed while the Walabot is connected. Please disconnect first and then apply the settings.')
+        try:
+            param_1 = (
+                float(self.param_1_min_entry.get()), float(self.param_1_max_entry.get()),
+                float(self.param_1_res_entry.get()))
+            param_2 = (
+                float(self.param_2_min_entry.get()), float(self.param_2_max_entry.get()),
+                float(self.param_2_res_entry.get()))
+            param_3 = (
+                float(self.param_3_min_entry.get()), float(self.param_3_max_entry.get()),
+                float(self.param_3_res_entry.get()))
+        except ValueError:
+            messagebox.showerror('Error setting arena', 'Invalid arena size(s) entered.')
             return
 
-        # TODO: implement error checking for the values
-        param_1 = (
-            float(self.param_1_min_entry.get()), float(self.param_1_max_entry.get()),
-            float(self.param_1_res_entry.get()))
-        param_2 = (
-            float(self.param_2_min_entry.get()), float(self.param_2_max_entry.get()),
-            float(self.param_2_res_entry.get()))
-        param_3 = (
-            float(self.param_3_min_entry.get()), float(self.param_3_max_entry.get()),
-            float(self.param_3_res_entry.get()))
-
-        threshold = float(self.threshold_entry.get())
+        try:
+            threshold = float(self.threshold_entry.get())
+        except ValueError:
+            messagebox.showerror('Error setting threshold', 'Invalid threshold entered.')
+            return
 
         filter_type = self.filter_list.get()
 
         self.master.set_walabot_settings(param_1, param_2, param_3, threshold, filter_type)
         self.close_settings_window()
+
+        # Reconnect (if connected) to Walabot to apply settings
+        if self.master.is_walabot_connected():
+            self.master.handle_walabot_disconnect()
+            self.master.handle_walabot_connect_and_setup()
 
     def handle_cancel_button(self):
         '''Also closes the settings window'''

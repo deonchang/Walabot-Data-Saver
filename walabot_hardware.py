@@ -31,7 +31,7 @@ class Walabot():
         except self.walabot.WalabotError:
             print('Failed to connect to the Walabot!')
             walabot_error = self.walabot.GetErrorString()
-        
+
         return walabot_error
 
     def disconnect(self):
@@ -80,19 +80,43 @@ class Walabot():
         return walabot_error
 
     def trigger(self):
-        '''Triggers the Walabot and saves data.'''
+        '''
+        Triggers the Walabot and saves data.
 
-        self.walabot.Trigger()
+        Output:
+            walabot_error: None if triggered successfully. Otherwise, the API error is returned.
+        '''
+
+        walabot_error = None
+        try:
+            self.walabot.Trigger()
+        except self.walabot.WalabotError:
+            walabot_error = self.walabot.GetErrorString()
+        
+        return walabot_error
 
     def calibrate(self):
-        '''Runs the built-in calibration function.'''
+        '''
+        Runs the built-in calibration function.
+        
+        Output:
+            walabot_error: None if calibration started successfully. Otherwise the API error is returned.
+        '''
 
-        self.walabot.StartCalibration()
+        walabot_error = None
+        try:
+            self.walabot.StartCalibration()
+        except self.walabot.WalabotError:
+            walabot_error = self.walabot.GetErrorString()
 
         # According to the API doc, the Walabot requires manual triggers to facilitate calibration.
         while self.walabot.GetStatus()[0] == self.walabot.STATUS_CALIBRATING:
             print('Calibrating: {}%'.format(self.walabot.GetStatus()[1]))
-            self.trigger()
+            trigger_error = self.trigger()
+            if trigger_error:
+                break
+
+        return walabot_error
 
     def get_raw_signals(self):
         '''
@@ -196,7 +220,7 @@ class Walabot():
 
         Outputs:
             image_np: 2D image as a Numpy array if no error occurred.
-            walabot_error: None if no error occurred. Otherwise returns the API error.
+            walabot_error: None if 2D image captured successfully. Otherwise returns the API error.
         '''
 
         walabot_error = None
@@ -214,7 +238,7 @@ class Walabot():
         Returns the dimensions of a 2D image slice given the current arena configuration.
 
         Output:
-            walabot_error: None if no error occurred. Otherwise returns the API error.
+            walabot_error: None if image dimensions obtained . Otherwise returns the API error.
         '''
 
         width = 0
@@ -235,7 +259,7 @@ class Walabot():
 
         Outputs:
             image_np: 3D image as a Numpy array if no error occurred.
-            walabot_error: None if no error occurred. Otherwise returns the API error.
+            walabot_error: None if 3D image captured successfully. Otherwise returns the API error.
         '''
 
         walabot_error = None

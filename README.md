@@ -30,7 +30,7 @@ The captures can then be saved by checking the data types you wish to save. A cu
 ```
 [prefix]_[capture_number]_[capture_type].csv
 ```
-The capture number is automatically incremented based on the number of files with the same prefixes in the current directory.
+The capture number is automatically incremented after each save. This integer can be manually specified as need (e.g. resuming from a previous session).
 
 ## License
 This project is licensed under the [GNU GPLv3](https://www.gnu.org/licenses/gpl-3.0.en.html) licence.
